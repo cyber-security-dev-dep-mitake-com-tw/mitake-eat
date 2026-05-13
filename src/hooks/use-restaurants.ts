@@ -130,8 +130,8 @@ export function useRestaurants() {
 
     list = list.filter((r) => r.priceLevel <= filter.maxPriceLevel);
     list = list.filter((r) => r.rating >= filter.minRating);
-    if (filter.maxDistance) {
-      list = list.filter((r) => (r.distance || 0) <= filter.maxDistance);
+    if (filter.maxDistance !== undefined) {
+      list = list.filter((r) => (r.distance || 0) <= filter.maxDistance!);
     }
     if (filter.selectedFoodTypes.length > 0) {
       list = list.filter((r) =>

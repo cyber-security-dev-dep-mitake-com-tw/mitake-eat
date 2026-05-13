@@ -58,6 +58,7 @@ export default function MapView({ restaurants, center }: Props) {
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current = [];
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center]);
 
   useEffect(() => {
