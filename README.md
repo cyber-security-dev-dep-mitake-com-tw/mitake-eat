@@ -61,7 +61,24 @@ npm run build
 - TailwindCSS
 - [next-intl](https://next-intl-docs.vercel.app/) (i18n)
 - Google Maps JavaScript API + Places Library
-- Deploy-ready on [Vercel](https://vercel.com)
+- Deploy-ready on [Vercel](https://vercel.com) and [GitHub Pages](https://pages.github.com)
+
+## Deploy
+
+### Vercel (Recommended)
+
+Push to GitHub, import the repo on [Vercel](https://vercel.com/new), and set the `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` environment variable.
+
+### GitHub Pages
+
+The repo includes a [GitHub Actions workflow](.github/workflows/deploy.yml) that builds and deploys to GitHub Pages automatically on every push to `main`.
+
+1. Go to your repo **Settings → Pages** and set **Source** to **GitHub Actions**
+2. Push to `main` — the workflow handles the rest
+
+The site will be available at `https://<org>.github.io/mitake-eat/`.
+
+> **Note:** The GitHub Pages build removes the locale middleware for static export. Locale routing is handled entirely via path segments (`/zh-TW/`, `/en/`); root `/` redirects to the default locale.
 
 ## Project Structure
 
