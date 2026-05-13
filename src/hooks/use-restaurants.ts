@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { Restaurant, SearchParams, FilterState, SortOption } from "@/lib/types";
 import { DEMO_RESTAURANTS } from "@/lib/demo-data";
-import { getGoogleMapsLoader, hasApiKey } from "@/lib/google-maps";
+import { searchRestaurants } from "@/lib/overpass";
 
 function deg2rad(deg: number): number {
   return deg * (Math.PI / 180);
@@ -20,49 +20,18 @@ function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): nu
 }
 
 async function searchRealApi(params: SearchParams): Promise<Restaurant[]> {
-  const loader = getGoogleMapsLoader();
-  await loader.load();
-  const { google } = window as any;
-  const service = new google.maps.places.PlacesService(
-    document.createElement("div"),
+  const results = await searchRestaurants(
+    params.lat,
+    params.lng,
+    params.radius,
+    params.foodTypes,
+    params.targetCount,
   );
 
-  const keyword = params.foodTypes.join(" ");
-  const results = await new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
-    service.nearbySearch(
-      {
-        location: { lat: params.lat, lng: params.lng },
-        radius: params.radius,
-        keyword: keyword || undefined,
-        type: "restaurant",
-      },
-      (res: any, status: any) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && res) {
-          resolve(res);
-        } else {
-          reject(new Error(`Places API error: ${status}`));
-        }
-      },
-    );
-  });
-
-  const restaurants: Restaurant[] = results.slice(0, params.targetCount).map((place) => ({
-    id: place.place_id || "",
-    name: place.name || "",
-    address: place.vicinity || "",
-    lat: place.geometry?.location?.lat() || 0,
-    lng: place.geometry?.location?.lng() || 0,
-    rating: place.rating || 0,
-    priceLevel: (place.price_level as 0 | 1 | 2 | 3 | 4) ?? 1,
-    types: place.types?.filter((t: string) => !t.includes("_")).slice(0, 3) as string[] || [],
-    website: place.website,
-    phone: place.formatted_phone_number,
-    photoUrl: place.photos?.[0]?.getUrl?.({ maxWidth: 400, maxHeight: 300 }) || "",
-    distance: getDistance(params.lat, params.lng, place.geometry?.location?.lat() || 0, place.geometry?.location?.lng() || 0),
-    openingHours: place.opening_hours?.weekday_text,
+  return results.map((r) => ({
+    ...r,
+    distance: getDistance(params.lat, params.lng, r.lat, r.lng),
   }));
-
-  return restaurants;
 }
 
 function searchDemo(params: SearchParams): Restaurant[] {
@@ -109,17 +78,14 @@ export function useRestaurants() {
     setLoading(true);
     setError(null);
     try {
-      if (hasApiKey()) {
-        const data = await searchRealApi(params);
-        setResults(data);
+      const data = await searchRealApi(params);
+      if (data.length === 0) {
+        setResults(searchDemo(params));
       } else {
-        const data = searchDemo(params);
         setResults(data);
       }
-    } catch (e: any) {
-      setError(e.message || "search_failed");
-      const data = searchDemo(params);
-      setResults(data);
+    } catch {
+      setResults(searchDemo(params));
     } finally {
       setLoading(false);
     }

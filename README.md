@@ -9,7 +9,7 @@ A location-based restaurant discovery app built with Next.js. Find the perfect p
 - **Food type selection** — choose from predefined tags or add custom keywords
 - **Date & time input** — optional, for filtering by opening hours
 - **Adjustable result count** — get 3–30 recommendations
-- **Map integration** — view results on Google Maps (requires API key)
+- **Map integration** — view results on an interactive map (Leaflet + OpenStreetMap, no API key needed)
 - **Filter & sort** — refine by price level, rating, distance, and food type; sort by rating, distance, or price
 - **i18n support** — Traditional Chinese (default) and English
 
@@ -26,27 +26,13 @@ A location-based restaurant discovery app built with Next.js. Find the perfect p
 npm install
 ```
 
-### Run (Demo Mode)
-
-No API key needed — works out of the box with 25 built-in Taipei restaurants.
-
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Run (With Google Maps)
-
-1. Create a Google Cloud project and enable **Places API** + **Maps JavaScript API**
-2. Create an API key and restrict it to your domain's HTTP referrers
-3. Create `.env.local`:
-
-```
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here
-```
-
-4. Restart the dev server
+No API keys required. Restaurant data comes from [OpenStreetMap](https://www.openstreetmap.org/) via the [Overpass API](https://overpass-api.de/), and maps are rendered with [Leaflet](https://leafletjs.com/) using free OpenStreetMap tiles.
 
 ### Build
 
@@ -60,14 +46,15 @@ npm run build
 - TypeScript
 - TailwindCSS
 - [next-intl](https://next-intl-docs.vercel.app/) (i18n)
-- Google Maps JavaScript API + Places Library
+- [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) (maps)
+- [Overpass API](https://overpass-api.de/) (restaurant data)
 - Deploy-ready on [Vercel](https://vercel.com) and [GitHub Pages](https://pages.github.com)
 
 ## Deploy
 
 ### Vercel (Recommended)
 
-Push to GitHub, import the repo on [Vercel](https://vercel.com/new), and set the `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` environment variable.
+Push to GitHub, import the repo on [Vercel](https://vercel.com/new). No environment variables needed.
 
 ### GitHub Pages
 
@@ -87,7 +74,7 @@ src/
 ├── app/[locale]/page.tsx    # Home page with search form + results view
 ├── components/               # UI components
 ├── hooks/                    # use-geolocation, use-restaurants
-├── lib/                      # types, constants, demo data, Google Maps loader
+├── lib/                      # types, constants, demo data, Overpass API wrapper
 ├── i18n/                     # next-intl routing
 └── middleware.ts             # Locale routing middleware
 messages/                     # zh-TW.json, en.json

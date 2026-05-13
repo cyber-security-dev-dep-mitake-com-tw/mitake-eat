@@ -2,88 +2,96 @@
 
 import { useEffect, useRef } from "react";
 import type { Restaurant } from "@/lib/types";
-import { getGoogleMapsLoader, hasApiKey } from "@/lib/google-maps";
 
 type Props = {
   restaurants: Restaurant[];
   center: { lat: number; lng: number };
 };
 
+function markerHtml(i: number) {
+  return `<div class="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold border-2 border-white shadow-lg">${i + 1}</div>`;
+}
+
 export default function MapView({ restaurants, center }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  const mapInstance = useRef<any>(null);
+  const markers = useRef<any[]>([]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || mapInstance.current) return;
 
-    if (!hasApiKey()) {
-      mapRef.current.innerHTML = `
-        <div class="flex items-center justify-center h-full bg-gray-100 rounded-lg">
-          <div class="text-center p-6">
-            <p class="text-3xl mb-2">🗺️</p>
-            <p class="text-gray-500 text-sm">Demo mode — map requires Google Maps API key</p>
-          </div>
-        </div>
-      `;
-      return;
-    }
+    let destroyed = false;
 
-    const initMap = async () => {
-      const loader = getGoogleMapsLoader();
-      await loader.load();
-      const { Map } = (await google.maps.importLibrary("maps")) as google.maps.MapsLibrary;
-      const { Marker } = (await google.maps.importLibrary("marker")) as google.maps.MarkerLibrary;
+    import("leaflet").then((L) => {
+      if (destroyed || !mapRef.current) return;
 
-      const map = new Map(mapRef.current!, {
-        center,
+      const map = L.map(mapRef.current, {
+        center: [center.lat, center.lng],
         zoom: 14,
-        mapId: "mitake_eat_map",
+        zoomControl: true,
       });
-      mapInstanceRef.current = map;
 
-      restaurants.forEach((r) => {
-        const marker = new Marker({
-          position: { lat: r.lat, lng: r.lng },
-          map,
-          title: r.name,
-        });
-        markersRef.current.push(marker);
-      });
-    };
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19,
+      }).addTo(map);
 
-    initMap().catch(console.error);
+      mapInstance.current = map;
+    });
 
     return () => {
-      markersRef.current.forEach((m) => m.setMap(null));
-      markersRef.current = [];
+      destroyed = true;
+      markers.current.forEach((m: any) => m.remove());
+      markers.current = [];
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center]);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !hasApiKey()) return;
-    markersRef.current.forEach((m) => m.setMap(null));
-    markersRef.current = [];
+    const map = mapInstance.current;
+    if (!map) return;
 
-    const initMarkers = async () => {
-      const { Marker } = (await google.maps.importLibrary("marker")) as google.maps.MarkerLibrary;
-      restaurants.forEach((r) => {
-        const marker = new Marker({
-          position: { lat: r.lat, lng: r.lng },
-          map: mapInstanceRef.current!,
-          title: r.name,
+    markers.current.forEach((m: any) => m.remove());
+    markers.current = [];
+
+    if (restaurants.length === 0) return;
+
+    import("leaflet").then((L) => {
+      const bounds = L.latLngBounds(
+        restaurants.map((r) => [r.lat, r.lng] as [number, number]),
+      );
+
+      restaurants.forEach((r, i) => {
+        const icon = L.divIcon({
+          className: "",
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+          html: markerHtml(i),
         });
-        markersRef.current.push(marker);
+
+        const marker = L.marker([r.lat, r.lng], { icon }).addTo(map);
+        marker.bindPopup(`
+          <div class="text-sm">
+            <strong>${r.name}</strong><br/>
+            ${r.rating > 0 ? `★ ${r.rating} · ` : ""}
+            ${r.address ? `${r.address}<br/>` : ""}
+            ${r.phone ? `${r.phone}<br/>` : ""}
+            ${r.website ? `<a href="${r.website}" target="_blank" class="text-blue-600">官網</a>` : ""}
+          </div>
+        `);
+        markers.current.push(marker);
       });
-    };
-    initMarkers();
+
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+      }
+    });
   }, [restaurants]);
 
   return (
-    <div
-      ref={mapRef}
-      className="w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-gray-200"
-    />
+    <div ref={mapRef} className="w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-gray-200" />
   );
 }
