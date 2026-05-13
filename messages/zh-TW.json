@@ -1,0 +1,60 @@
+{
+  "home": {
+    "title": "Mitake Eat",
+    "back": "返回搜尋"
+  },
+  "location": {
+    "title": "開啟定位",
+    "description": "我們需要您的位置資訊來尋找附近的餐廳",
+    "button": "允許定位",
+    "requesting": "定位中...",
+    "acquired": "已取得位置",
+    "geolocation_not_supported": "您的瀏覽器不支援地理定位",
+    "geolocation_denied": "定位權限遭到拒絕，請在瀏覽器設定中允許",
+    "geolocation_unavailable": "無法取得位置資訊",
+    "geolocation_timeout": "定位請求超時",
+    "geolocation_unknown_error": "定位時發生未知錯誤"
+  },
+  "search": {
+    "title": "搜尋餐廳",
+    "radius": "搜尋半徑",
+    "budget": "預算",
+    "per_person": "每人",
+    "total": "總額",
+    "participants": "人數",
+    "target_count": "推薦數量",
+    "food_type": "食物類型",
+    "custom_food_placeholder": "輸入自訂類型...",
+    "add": "新增",
+    "date_time": "日期與時間",
+    "date_time_hint": "可選，用於過濾營業時間",
+    "submit": "開始搜尋",
+    "searching": "搜尋中..."
+  },
+  "restaurant": {
+    "loading": "正在搜尋餐廳...",
+    "empty": "沒有符合條件的餐廳，請調整搜尋條件",
+    "website": "官網",
+    "map": "Google 地圖",
+    "hours": "營業時間",
+    "reservation": "預約"
+  },
+  "filter": {
+    "count": "共 {count} 間餐廳",
+    "max_price": "最高價格",
+    "min_rating": "最低評分",
+    "max_distance": "最遠距離",
+    "food_types": "食物類型",
+    "any": "不限",
+    "price_0": "免費",
+    "price_1": "便宜",
+    "price_2": "中等",
+    "price_3": "昂貴",
+    "price_4": "非常昂貴",
+    "rating_desc": "評分高→低",
+    "rating_asc": "評分低→高",
+    "distance": "距離近→遠",
+    "price_asc": "價格低→高",
+    "price_desc": "價格高→低"
+  }
+}
